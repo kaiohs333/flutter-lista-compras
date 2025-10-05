@@ -29,9 +29,9 @@ class PaginaInicial extends StatefulWidget {
 }
 
 class _PaginaInicialState extends State<PaginaInicial> {
-  final List<String> itensCompra = [];
-  final List<bool> itensComprados = []; // Lista para marcar itens comprados
-  final TextEditingController controladorTexto = TextEditingController();
+  List<String> itensCompra = [];
+  List<bool> itensComprados = []; // Lista para marcar itens comprados
+  TextEditingController controladorTexto = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +44,12 @@ class _PaginaInicialState extends State<PaginaInicial> {
           // Botão para limpar toda a lista
           IconButton(
             icon: const Icon(Icons.clear_all),
-            onPressed: _limparLista,
+            onPressed: limparLista,
             tooltip: 'Limpar lista',
           ),
         ],
       ),
+      
       body: Column(
         children: [
           // Área para adicionar itens
@@ -75,12 +76,12 @@ class _PaginaInicialState extends State<PaginaInicial> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.add_shopping_cart),
                     ),
-                    onSubmitted: (texto) => _adicionarItem(),
+                    onSubmitted: (texto) => adicionarItem(),
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
-                  onPressed: _adicionarItem,
+                  onPressed: adicionarItem,
                   icon: const Icon(Icons.add),
                   label: const Text('Adicionar'),
                   style: ElevatedButton.styleFrom(
@@ -154,7 +155,7 @@ class _PaginaInicialState extends State<PaginaInicial> {
                         child: ListTile(
                           leading: Checkbox(
                             value: foiComprado,
-                            onChanged: (valor) => _marcarComoComprado(indice, valor ?? false),
+                            onChanged: (valor) => marcarComoComprado(indice, valor ?? false),
                           ),
                           title: Text(
                             itensCompra[indice],
@@ -166,7 +167,7 @@ class _PaginaInicialState extends State<PaginaInicial> {
                           ),
                           trailing: IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _mostrarConfirmacaoRemocao(indice),
+                            onPressed: () => mostrarConfirmacaoRemocao(indice),
                           ),
                           tileColor: foiComprado ? Colors.green[50] : null,
                         ),
@@ -194,18 +195,19 @@ class _PaginaInicialState extends State<PaginaInicial> {
     );
   }
 
-  void _adicionarItem() {
+  void adicionarItem() {
     String novoItem = controladorTexto.text.trim();
     
     if (novoItem.isNotEmpty) {
-      if (itensCompra.any((item) => item.toLowerCase() == novoItem.toLowerCase())) {
+      // Verificar se item já existe
+      if (itensCompra.contains(novoItem)) {
         _mostrarMensagem('Este item já está na sua lista!');
         return;
       }
       
       setState(() {
         itensCompra.add(novoItem);
-        itensComprados.add(false);
+        itensComprados.add(false); // Novo item começa como não comprado
         controladorTexto.clear();
       });
       
@@ -213,7 +215,7 @@ class _PaginaInicialState extends State<PaginaInicial> {
     }
   }
 
-  void _removerItem(int indice) {
+  void removerItem(int indice) {
     String itemRemovido = itensCompra[indice];
     setState(() {
       itensCompra.removeAt(indice);
@@ -222,7 +224,7 @@ class _PaginaInicialState extends State<PaginaInicial> {
     _mostrarMensagem('Item "$itemRemovido" removido!');
   }
 
-  void _marcarComoComprado(int indice, bool comprado) {
+  void marcarComoComprado(int indice, bool comprado) {
     setState(() {
       itensComprados[indice] = comprado;
     });
@@ -231,7 +233,7 @@ class _PaginaInicialState extends State<PaginaInicial> {
     _mostrarMensagem(mensagem);
   }
 
-  void _limparLista() {
+  void limparLista() {
     if (itensCompra.isEmpty) return;
     
     showDialog(
@@ -262,7 +264,7 @@ class _PaginaInicialState extends State<PaginaInicial> {
     );
   }
 
-  void _mostrarConfirmacaoRemocao(int indice) {
+  void mostrarConfirmacaoRemocao(int indice) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -276,7 +278,7 @@ class _PaginaInicialState extends State<PaginaInicial> {
             ),
             TextButton(
               onPressed: () {
-                _removerItem(indice);
+                removerItem(indice);
                 Navigator.of(context).pop();
               },
               child: const Text('Remover', style: TextStyle(color: Colors.red)),
@@ -288,7 +290,6 @@ class _PaginaInicialState extends State<PaginaInicial> {
   }
 
   void _mostrarMensagem(String mensagem) {
-    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(mensagem),
